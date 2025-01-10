@@ -325,6 +325,7 @@ struct Configuration {
     const char *imageFilename;
     const char *jsonFilename;
     const char *csvFilename;
+    const char *atlasFilename;
     const char *shadronPreviewFilename;
     const char *shadronPreviewText;
 };
@@ -556,6 +557,10 @@ int main(int argc, const char *const *argv) {
         }
         ARG_CASE("-csv", 1) {
             config.csvFilename = argv[argPos++];
+            continue;
+        }
+        ARG_CASE("-atlas", 1) {
+            config.AtlasFilename = argv[argPos++];
             continue;
         }
         ARG_CASE("-shadronpreview", 2) {
@@ -935,7 +940,7 @@ int main(int argc, const char *const *argv) {
     }
     if (!fontInput.fontFilename)
         ABORT("No font specified.");
-    if (!(config.arteryFontFilename || config.imageFilename || config.jsonFilename || config.csvFilename || config.shadronPreviewFilename)) {
+    if (!(config.arteryFontFilename || config.imageFilename || config.jsonFilename || config.csvFilename || config.atlasFilename || config.shadronPreviewFilename)) {
         fputs("No output specified.\n", stderr);
         return 0;
     }
@@ -1034,7 +1039,7 @@ int main(int argc, const char *const *argv) {
         result = 1;
         fputs("Error: Unable to create an Artery Font file with the specified image format!\n", stderr);
         // Recheck whether there is anything else to do
-        if (!(config.arteryFontFilename || config.imageFilename || config.jsonFilename || config.csvFilename || config.shadronPreviewFilename))
+        if (!(config.arteryFontFilename || config.imageFilename || config.jsonFilename || config.csvFilename || config.atlasFilename || config.shadronPreviewFilename))
             return result;
         layoutOnly = !(config.arteryFontFilename || config.imageFilename);
     }
@@ -1394,6 +1399,14 @@ int main(int argc, const char *const *argv) {
         else {
             result = 1;
             fputs("Failed to write CSV output file.\n", stderr);
+        }
+    }
+    if (config.atlasFilename) {
+        if (exportAtlas(fonts.data(), fonts.size(), config.width, config.height, config.yDirection, config.atlasFilename))
+            fputs("Glyph layout written into Atlas file.\n", stderr);
+        else {
+            result = 1;
+            fputs("Failed to write Atlas output file.\n", stderr);
         }
     }
 
